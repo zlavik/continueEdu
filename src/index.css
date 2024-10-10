@@ -1,0 +1,41 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+body {
+  font-family: 'Inter', sans-serif;
+}
+
+.dark {
+  color-scheme: dark;
+}
+
+@layer base {
+  h1 {
+    @apply text-2xl font-bold md:text-4xl;
+  }
+  h2 {
+    @apply text-xl font-semibold md:text-3xl;
+  }
+  h3 {
+    @apply text-lg font-semibold md:text-2xl;
+  }
+}
+
+@layer components {
+  .btn {
+    @apply px-4 py-2 rounded-md font-semibold transition-colors duration-200;
+  }
+  .btn-primary {
+    @apply bg-blue-500 text-white hover:bg-blue-600;
+  }
+  .btn-secondary {
+    @apply bg-gray-500 text-white hover:bg-gray-600;
+  }
+}
+
+@layer utilities {
+  .content-wrapper {
+    @apply container mx-auto px-4 py-8 md:py-12;
+  }
+}
