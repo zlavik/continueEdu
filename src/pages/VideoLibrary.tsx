@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useParams } from 'react-router-dom';
 import { useTheme } from '../context/ThemeContext';
 import { useAuth } from '../context/AuthContext';
-import { Edit2, Star, Eye, EyeOff } from 'lucide-react';
+import { Edit2, Star, Eye, EyeOff, Search } from 'lucide-react';
 import Modal from '../components/Modal';
 import Tooltip from '../components/Tooltip';
 
@@ -21,10 +21,12 @@ const VideoLibrary: React.FC = () => {
   const { user } = useAuth();
   const { category } = useParams<{ category: string }>();
   const [videos, setVideos] = useState<Video[]>([]);
+  const [filteredVideos, setFilteredVideos] = useState<Video[]>([]);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [editingVideo, setEditingVideo] = useState<Video | null>(null);
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
   const [sortBy, setSortBy] = useState<'featured' | 'date' | 'hot' | 'length'>('featured');
+  const [searchTerm, setSearchTerm] = useState('');
 
   useEffect(() => {
     // Simulating fetching videos from an API
@@ -34,7 +36,15 @@ const VideoLibrary: React.FC = () => {
       { id: '3', title: "Stress Management Techniques", thumbnail: "https://example.com/stress.jpg", length: "30:00", price: 14.99, featured: false, visible: true },
     ];
     setVideos(fetchedVideos);
+    setFilteredVideos(fetchedVideos);
   }, [category]);
+
+  useEffect(() => {
+    const filtered = videos.filter(video => 
+      video.title.toLowerCase().includes(searchTerm.toLowerCase())
+    );
+    setFilteredVideos(filtered);
+  }, [searchTerm, videos]);
 
   const handleEditClick = (video: Video) => {
     setEditingVideo(video);
@@ -68,7 +78,7 @@ const VideoLibrary: React.FC = () => {
     setVideos(videos.map(v => v.id === videoId ? { ...v, visible: !v.visible } : v));
   };
 
-  const sortedVideos = [...videos].sort((a, b) => {
+  const sortedVideos = [...filteredVideos].sort((a, b) => {
     switch (sortBy) {
       case 'featured':
         return (b.featured ? 1 : 0) - (a.featured ? 1 : 0);
@@ -89,6 +99,16 @@ const VideoLibrary: React.FC = () => {
         <h1 className="text-4xl font-bold mb-8 capitalize">{category?.replace('-', ' ')} Video Library</h1>
         
         <div className="mb-4 flex justify-between items-center">
+          <div className="relative">
+            <input
+              type="text"
+              placeholder="Search videos..."
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              className={`pl-10 pr-4 py-2 rounded-full ${theme === 'dark' ? 'bg-gray-800' : 'bg-white'} focus:outline-none focus:ring-2 focus:ring-blue-500`}
+            />
+            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" size={20} />
+          </div>
           <select
             value={sortBy}
             onChange={(e) => setSortBy(e.target.value as 'featured' | 'date' | 'hot' | 'length')}
