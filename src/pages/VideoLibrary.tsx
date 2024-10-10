@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useParams } from 'react-router-dom';
 import { useTheme } from '../context/ThemeContext';
 import { useAuth } from '../context/AuthContext';
-import { Edit2, Star, Eye, EyeOff, Search } from 'lucide-react';
+import { Edit2, Star, Eye, EyeOff, Search, Plus } from 'lucide-react';
 import Modal from '../components/Modal';
 import Tooltip from '../components/Tooltip';
 
@@ -27,13 +27,25 @@ const VideoLibrary: React.FC = () => {
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
   const [sortBy, setSortBy] = useState<'featured' | 'date' | 'hot' | 'length'>('featured');
   const [searchTerm, setSearchTerm] = useState('');
+  const [isAddModalOpen, setIsAddModalOpen] = useState(false);
+  const [newVideo, setNewVideo] = useState<Video>({
+    id: '',
+    title: '',
+    thumbnail: '',
+    length: '',
+    price: 0,
+    featured: false,
+    visible: true
+  });
+
+
 
   useEffect(() => {
     // Simulating fetching videos from an API
     const fetchedVideos: Video[] = [
-      { id: '1', title: "Understanding Anxiety", thumbnail: "https://example.com/anxiety.jpg", length: "45:00", price: 19.99, featured: true, visible: true },
-      { id: '2', title: "Coping with Depression", thumbnail: "https://example.com/depression.jpg", length: "50:00", price: 24.99, featured: false, visible: true },
-      { id: '3', title: "Stress Management Techniques", thumbnail: "https://example.com/stress.jpg", length: "30:00", price: 14.99, featured: false, visible: true },
+      { id: '1', title: "Understanding Anxiety", thumbnail: "https://convergencepolicy.org/wp-content/uploads/2022/12/Health-and-Wellbeing_teal-01.png", length: "45:00", price: 19.99, featured: true, visible: true },
+      { id: '2', title: "Coping with Depression", thumbnail: "https://www.planstreetinc.com/wp-content/uploads/2021/07/what-is-mental-health.png", length: "50:00", price: 24.99, featured: false, visible: true },
+      { id: '3', title: "Stress Management Techniques", thumbnail: "https://www.skippackpharmacy.com/wp-content/uploads/2023/04/mental-health-wellness-during-covid-19.jpg", length: "30:00", price: 14.99, featured: false, visible: true },
     ];
     setVideos(fetchedVideos);
     setFilteredVideos(fetchedVideos);
@@ -50,6 +62,11 @@ const VideoLibrary: React.FC = () => {
     setEditingVideo(video);
     setIsEditModalOpen(true);
   };
+
+  const handleAddVideoClick = () => {
+    setIsAddModalOpen(true);
+  };
+  
 
   const handleSaveEdit = (editedVideo: Video) => {
     setVideos(videos.map(v => v.id === editedVideo.id ? editedVideo : v));
@@ -97,17 +114,25 @@ const VideoLibrary: React.FC = () => {
     <div className={`${theme === 'dark' ? 'bg-gray-900 text-white' : 'bg-gray-100 text-gray-800'} min-h-screen`}>
       <div className="container mx-auto px-4 py-12">
         <h1 className="text-4xl font-bold mb-8 capitalize">{category?.replace('-', ' ')} Video Library</h1>
-        
         <div className="mb-4 flex justify-between items-center">
-          <div className="relative">
-            <input
-              type="text"
-              placeholder="Search videos..."
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-              className={`pl-10 pr-4 py-2 rounded-full ${theme === 'dark' ? 'bg-gray-800' : 'bg-white'} focus:outline-none focus:ring-2 focus:ring-blue-500`}
-            />
-            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" size={20} />
+          <div className="flex items-center">
+            <div className="relative mr-4">
+              <input
+                type="text"
+                placeholder="Search videos..."
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                className={`pl-10 pr-4 py-2 rounded-full ${theme === 'dark' ? 'bg-gray-800' : 'bg-white'} focus:outline-none focus:ring-2 focus:ring-blue-500`}
+              />
+              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" size={20} />
+            </div>
+            <button
+              onClick={handleAddVideoClick}
+              className="bg-green-500 hover:bg-green-600 text-white font-bold py-2 px-4 rounded-full flex items-center"
+            >
+              <Plus size={20} className="mr-2" />
+              Add Video
+            </button>
           </div>
           <select
             value={sortBy}
@@ -120,11 +145,13 @@ const VideoLibrary: React.FC = () => {
             <option value="length">Length</option>
           </select>
         </div>
-
         <div className="grid md:grid-cols-3 gap-8">
           {sortedVideos.map(video => (
             <div key={video.id} className={`${theme === 'dark' ? 'bg-gray-800' : 'bg-white'} rounded-lg shadow-md overflow-hidden relative ${!video.visible ? 'opacity-50' : ''}`}>
-              <img src={video.thumbnail} alt={video.title} className="w-full h-48 object-cover" />
+              <img 
+                src={video.thumbnail} 
+                alt={video.title} 
+                className="w-full h-48 object-contain bg-gray-100" />
               <div className="p-4">
                 <h2 className="text-xl font-semibold mb-2">{video.title}</h2>
                 <p>Length: {video.length}</p>
@@ -133,20 +160,23 @@ const VideoLibrary: React.FC = () => {
                   {user ? 'Watch Now' : 'Buy'}
                 </button>
               </div>
-              <div className="absolute top-2 right-2 flex space-x-2">
+              <div className='absolute top-2 left-2 flex space-x-2'>
                 <Tooltip content={video.featured ? "Unfeature" : "Feature"}>
                   <button onClick={() => toggleFeatured(video.id)}>
-                    <Star className={video.featured ? 'text-yellow-400 fill-current' : 'text-gray-400'} />
+                    <Star className={video.featured ? 'text-yellow-400 fill-current' : 'text-gray-500'} />
                   </button>
                 </Tooltip>
+              
+              </div>
+              <div className="absolute top-2 right-2 flex space-x-2">
                 <Tooltip content={video.visible ? "Hide" : "Show"}>
                   <button onClick={() => toggleVisibility(video.id)}>
-                    {video.visible ? <Eye /> : <EyeOff />}
+                    {video.visible ? <Eye className="text-gray-500" /> : <EyeOff className="text-gray-500" />}
                   </button>
                 </Tooltip>
                 <Tooltip content="Edit">
                   <button onClick={() => handleEditClick(video)}>
-                    <Edit2 />
+                    <Edit2 className="text-gray-500" />
                   </button>
                 </Tooltip>
               </div>
@@ -218,6 +248,97 @@ const VideoLibrary: React.FC = () => {
             </div>
           </form>
         )}
+      </Modal>
+
+      <Modal
+        isOpen={isAddModalOpen}
+        onClose={() => setIsAddModalOpen(false)}
+        title="Add New Video"
+      >
+        <form onSubmit={(e) => {
+          e.preventDefault();
+          const videoToAdd = {
+            ...newVideo,
+            id: Date.now().toString(), // Generate a unique ID
+          };
+          setVideos([...videos, videoToAdd]);
+          setFilteredVideos([...filteredVideos, videoToAdd]);
+          setIsAddModalOpen(false);
+          setNewVideo({
+            id: '',
+            title: '',
+            thumbnail: '',
+            length: '',
+            price: 0,
+            featured: false,
+            visible: true
+          });
+        }}>
+          <div className="mb-4">
+            <label className="block mb-2">Title</label>
+            <input
+              type="text"
+              value={newVideo.title}
+              onChange={(e) => setNewVideo({...newVideo, title: e.target.value})}
+              className={`w-full p-2 rounded ${theme === 'dark' ? 'bg-gray-700' : 'bg-gray-100'}`}
+            />
+          </div>
+          <div className="mb-4">
+            <label className="block mb-2">Thumbnail URL</label>
+            <input
+              type="url"
+              value={newVideo.thumbnail}
+              onChange={(e) => setNewVideo({...newVideo, thumbnail: e.target.value})}
+              className={`w-full p-2 rounded ${theme === 'dark' ? 'bg-gray-700' : 'bg-gray-100'}`}
+              placeholder="https://example.com/thumbnail.jpg"
+            />
+          </div>
+
+          <div className="mb-4">
+            <label className="block mb-2">Thumbnail Preview</label>
+            <div className="w-full h-48 bg-gray-200 rounded flex items-center justify-center">
+              {newVideo.thumbnail ? (
+                <img src={newVideo.thumbnail} alt="Thumbnail preview" className="max-w-full max-h-full object-contain" />
+              ) : (
+                <span className="text-gray-500">No thumbnail</span>
+              )}
+            </div>
+          </div>
+
+          <div className="mb-4">
+            <label className="block mb-2">Length (e.g., 10:30)</label>
+            <input
+              type="text"
+              value={newVideo.length}
+              onChange={(e) => setNewVideo({...newVideo, length: e.target.value})}
+              className={`w-full p-2 rounded ${theme === 'dark' ? 'bg-gray-700' : 'bg-gray-100'}`}
+            />
+          </div>
+          <div className="mb-4">
+            <label className="block mb-2">Price</label>
+            <input
+              type="number"
+              value={newVideo.price}
+              onChange={(e) => setNewVideo({...newVideo, price: parseFloat(e.target.value)})}
+              className={`w-full p-2 rounded ${theme === 'dark' ? 'bg-gray-700' : 'bg-gray-100'}`}
+            />
+          </div>
+          <div className="flex justify-end">
+            <button
+              type="button"
+              onClick={() => setIsAddModalOpen(false)}
+              className="bg-gray-500 text-white px-4 py-2 rounded hover:bg-gray-600 mr-2"
+            >
+              Cancel
+            </button>
+            <button
+              type="submit"
+              className="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600"
+            >
+              Add Video
+            </button>
+          </div>
+        </form>
       </Modal>
 
       <Modal

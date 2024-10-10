@@ -1,4 +1,12 @@
-import React, { createContext, useContext, useState, useEffect } from 'react';
+import { createContext, useContext, useState, useEffect } from 'react';
+import { auth } from '../firebase/config';
+import { 
+  createUserWithEmailAndPassword, 
+  signInWithEmailAndPassword, 
+  signOut, 
+  onAuthStateChanged,
+  User as FirebaseUser
+} from 'firebase/auth';
 
 interface User {
   id: string;
@@ -10,42 +18,42 @@ interface User {
 interface AuthContextType {
   user: User | null;
   login: (email: string, password: string) => Promise<void>;
-  logout: () => void;
+  logout: () => Promise<void>;
   signup: (name: string, email: string, password: string) => Promise<void>;
 }
 
-const AuthContext = createContext<AuthContextType | undefined>(undefined);
+export const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [user, setUser] = useState<User | null>(null);
-
   useEffect(() => {
-    // Check if user is logged in (e.g., by checking localStorage or a token)
-    const storedUser = localStorage.getItem('user');
-    if (storedUser) {
-      setUser(JSON.parse(storedUser));
-    }
+    const unsubscribe = onAuthStateChanged(auth, (firebaseUser) => {
+      if (firebaseUser) {
+        setUser({
+          id: firebaseUser.uid,
+          name: firebaseUser.displayName || 'User',
+          email: firebaseUser.email || '',
+          isAdmin: false, // You'll need to implement admin check logic
+        });
+      } else {
+        setUser(null);
+      }
+    });
+
+    return () => unsubscribe();
   }, []);
 
   const login = async (email: string, password: string) => {
-    // Implement actual login logic here
-    // For now, we'll just simulate a successful login
-    const mockUser = { id: '1', name: 'John Doe', email, isAdmin: true };
-    setUser(mockUser);
-    localStorage.setItem('user', JSON.stringify(mockUser));
+    await signInWithEmailAndPassword(auth, email, password);
   };
 
-  const logout = () => {
-    setUser(null);
-    localStorage.removeItem('user');
+  const logout = async () => {
+    await signOut(auth);
   };
 
-  const signup = async (name: string, email: string, password: string) => {
-    // Implement actual signup logic here
-    // For now, we'll just simulate a successful signup
-    const mockUser = { id: '1', name, email, isAdmin: false };
-    setUser(mockUser);
-    localStorage.setItem('user', JSON.stringify(mockUser));
+  const signup = async (email: string, password: string) => {
+    const userCredential = await createUserWithEmailAndPassword(auth, email, password);
+    // You might want to update the user profile with the name here
   };
 
   return (

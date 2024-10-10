@@ -1,10 +1,14 @@
 import React, { useState } from 'react';
 import { useTheme } from '../context/ThemeContext';
 import { useAuth } from '../context/AuthContext';
+import { GoogleAuthProvider, signInWithPopup } from 'firebase/auth';
+import { auth } from '../firebase/config';
+import { useNavigate } from 'react-router-dom';
 
 const Login: React.FC = () => {
   const { theme } = useTheme();
   const { login, signup } = useAuth();
+  const navigate = useNavigate();
   const [isLogin, setIsLogin] = useState(true);
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -18,17 +22,27 @@ const Login: React.FC = () => {
       } else {
         await signup(name, email, password);
       }
-      // Handle successful login/signup (e.g., redirect to dashboard)
+      navigate('/dashboard');
     } catch (error) {
       console.error('Authentication error:', error);
       // Handle error (e.g., show error message to user)
     }
   };
 
+  const handleGoogleAuth = async () => {
+    const provider = new GoogleAuthProvider();
+    try {
+      await signInWithPopup(auth, provider);
+      navigate('/dashboard');
+    } catch (error) {
+      console.error('Google authentication error:', error);
+      // Handle error (e.g., show error message to user)
+    }
+  };
+
   return (
     <div className={`${theme === 'dark' ? 'bg-gray-900 text-white' : 'bg-gray-100 text-gray-800'} min-h-screen flex items-center justify-center`}>
-      <div className={`${theme === 'dark' ? 'bg-gray-800' : 'bg-white'} p-8 rounded-lg shadow-md w-full max-w-md`}>
-        <h1 className="text-3xl font-bold mb-6 text-center">{isLogin ? 'Login' : 'Sign Up'}</h1>
+      <div className={`${theme === 'dark' ? 'bg-gray-800' : 'bg-white'} p-8 rounded-lg shadow-md w-full max-w-md`}>        <h1 className="text-3xl font-bold mb-6 text-center">{isLogin ? 'Login' : 'Sign Up'}</h1>
         <form onSubmit={handleSubmit} className="space-y-4">
           {!isLogin && (
             <div>
@@ -72,6 +86,14 @@ const Login: React.FC = () => {
             {isLogin ? 'Log In' : 'Sign Up'}
           </button>
         </form>
+        <div className="mt-4">
+          <button
+            onClick={handleGoogleAuth}
+            className="w-full bg-red-500 hover:bg-red-600 text-white font-bold py-2 px-4 rounded"
+          >
+            {isLogin ? 'Log In' : 'Sign Up'} with Google
+          </button>
+        </div>
         <div className="mt-4 text-center">
           <button
             onClick={() => setIsLogin(!isLogin)}

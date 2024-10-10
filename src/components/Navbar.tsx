@@ -25,26 +25,22 @@ const Navbar: React.FC = () => {
   }, []);
 
   const toggleMenu = () => setIsMenuOpen(!isMenuOpen);
-
   const NavLinks = () => (
     <>
       <Link to="/" className="block py-2 px-4 hover:bg-gray-100 dark:hover:bg-gray-700">Home</Link>
       <Link to="/upcoming-events" className="block py-2 px-4 hover:bg-gray-100 dark:hover:bg-gray-700">Upcoming Events</Link>
-      <div className="relative" ref={dropdownRef}>
+      <div className="relative group">
         <button
-          onClick={() => setIsDropdownOpen(!isDropdownOpen)}
           className="block w-full text-left py-2 px-4 hover:bg-gray-100 dark:hover:bg-gray-700"
         >
           Video Library
         </button>
-        {isDropdownOpen && (
-          <div className={`absolute left-0 mt-2 w-48 rounded-md shadow-lg ${theme === 'dark' ? 'bg-gray-700' : 'bg-white'}`}>
-            <Link to="/video-library/mental-health" className="block px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-600">Mental Health</Link>
-            <Link to="/video-library/eating-disorders" className="block px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-600">Eating Disorders</Link>
-            <Link to="/video-library/transgender-health" className="block px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-600">Transgender Health</Link>
-            <Link to="/video-library/other" className="block px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-600">Other</Link>
-          </div>
-        )}
+        <div className={`absolute left-0 mt-0 w-48 rounded-md shadow-lg ${theme === 'dark' ? 'bg-gray-700' : 'bg-white'} invisible group-hover:visible`}>
+          <Link to="/video-library/mental-health" className="block px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-600">Mental Health</Link>
+          <Link to="/video-library/eating-disorders" className="block px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-600">Eating Disorders</Link>
+          <Link to="/video-library/transgender-health" className="block px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-600">Transgender Health</Link>
+          <Link to="/video-library/other" className="block px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-600">Other</Link>
+        </div>
       </div>
       <Link to="/contact" className="block py-2 px-4 hover:bg-gray-100 dark:hover:bg-gray-700">Contact Us</Link>
       {user ? (
@@ -53,9 +49,7 @@ const Navbar: React.FC = () => {
         <Link to="/login" className="block py-2 px-4 hover:bg-gray-100 dark:hover:bg-gray-700">Login</Link>
       )}
     </>
-  );
-
-  return (
+  );  return (
     <nav className={`sticky top-0 z-10 ${theme === 'dark' ? 'bg-gray-800 text-white' : 'bg-white text-gray-800'} shadow-md`}>
       <div className="container mx-auto px-4">
         <div className="flex justify-between items-center py-4">
