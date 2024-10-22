@@ -5,6 +5,7 @@ import { useAuth } from '../context/AuthContext';
 import { Edit2, Star, Eye, EyeOff, Search, Plus } from 'lucide-react';
 import Modal from '../components/Modal';
 import Tooltip from '../components/Tooltip';
+import { getVideos } from '../services/firebaseService';
 
 interface Video {
   id: string;
@@ -38,17 +39,13 @@ const VideoLibrary: React.FC = () => {
     visible: true
   });
 
-
-
   useEffect(() => {
-    // Simulating fetching videos from an API
-    const fetchedVideos: Video[] = [
-      { id: '1', title: "Understanding Anxiety", thumbnail: "https://convergencepolicy.org/wp-content/uploads/2022/12/Health-and-Wellbeing_teal-01.png", length: "45:00", price: 19.99, featured: true, visible: true },
-      { id: '2', title: "Coping with Depression", thumbnail: "https://www.planstreetinc.com/wp-content/uploads/2021/07/what-is-mental-health.png", length: "50:00", price: 24.99, featured: false, visible: true },
-      { id: '3', title: "Stress Management Techniques", thumbnail: "https://www.skippackpharmacy.com/wp-content/uploads/2023/04/mental-health-wellness-during-covid-19.jpg", length: "30:00", price: 14.99, featured: false, visible: true },
-    ];
-    setVideos(fetchedVideos);
-    setFilteredVideos(fetchedVideos);
+    const fetchVideos = async () => {
+      const fetchedVideos = await getVideos();
+      setVideos(fetchedVideos as Video[]);
+      setFilteredVideos(fetchedVideos as Video[]);
+    };
+    fetchVideos();
   }, [category]);
 
   useEffect(() => {
